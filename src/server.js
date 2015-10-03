@@ -14,6 +14,7 @@ import Html from './helpers/Html';
 import PrettyError from 'pretty-error';
 import http from 'http';
 import SocketIo from 'socket.io';
+import ReduxResolver from './helpers/universalReduxResolver';
 
 const pretty = new PrettyError();
 const app = new Express();
@@ -52,7 +53,9 @@ app.use((req, res) => {
     webpackIsomorphicTools.refresh();
   }
   const client = new ApiClient(req);
+  const resolver = new ReduxResolver();
   const store = createStore(client);
+  store.resolver = resolver;
   const location = createLocation(req.path, req.query);
 
   function hydrateOnClient() {
@@ -66,13 +69,18 @@ app.use((req, res) => {
   }
 
   universalRouter(location, undefined, store, true)
-    .then(({component, redirectLocation}) => {
+    .then(async ({component, redirectLocation}) => {
       if (redirectLocation) {
         res.redirect(redirectLocation.pathname + redirectLocation.search);
         return;
       }
+
+      ReactDOM.renderToString(component);
+      await resolver.dispatchAll();
+      const content = ReactDOM.renderToString(component);
+
       res.send('<!doctype html>\n' +
-        ReactDOM.renderToString(<Html assets={webpackIsomorphicTools.assets()} component={component} store={store}/>));
+        ReactDOM.renderToString(<Html assets={webpackIsomorphicTools.assets()} component={component} store={store} content={content}/>));
     })
     .catch((error) => {
       if (error.redirect) {

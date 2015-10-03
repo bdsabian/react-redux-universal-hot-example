@@ -17,13 +17,14 @@ export default class Html extends Component {
   static propTypes = {
     assets: PropTypes.object,
     component: PropTypes.object,
+    content: PropTypes.string,
     store: PropTypes.object
   }
 
   render() {
     const {assets, component, store} = this.props;
-    const content = ReactDOM.renderToString(component);
-
+    const content = this.props.content || ReactDOM.renderToString(component);
+    
     return (
       <html lang="en-us">
         <head>

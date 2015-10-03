@@ -3,7 +3,7 @@ import {bindActionCreators} from 'redux';
 import DocumentMeta from 'react-document-meta';
 import {connect} from 'react-redux';
 import * as widgetActions from 'redux/modules/widgets';
-import {isLoaded, load as loadWidgets} from 'redux/modules/widgets';
+import {isLoaded} from 'redux/modules/widgets';
 import {initializeWithKey} from 'redux-form';
 import { WidgetForm } from 'components';
 
@@ -13,12 +13,6 @@ import { WidgetForm } from 'components';
     editing: state.widgets.editing,
     error: state.widgets.error,
     loading: state.widgets.loading
-  }),
-  dispatch => ({
-    ...bindActionCreators({
-      ...widgetActions,
-      initializeWithKey
-    }, dispatch)
   })
 )
 export default
@@ -27,27 +21,37 @@ class Widgets extends Component {
     widgets: PropTypes.array,
     error: PropTypes.string,
     loading: PropTypes.bool,
-    initializeWithKey: PropTypes.func.isRequired,
     editing: PropTypes.object.isRequired,
-    load: PropTypes.func.isRequired,
-    editStart: PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired
   }
 
-  static fetchData(store) {
-    if (!isLoaded(store.getState())) {
-      return store.dispatch(loadWidgets());
+  static contextTypes = {
+    store: PropTypes.object.isRequired
+  }
+
+  componentWillMount() {
+    const { dispatch } = this.props;
+    const { resolver, getState } = this.context.store;
+    this.actions = bindActionCreators( {
+      ...widgetActions,
+      initializeWithKey
+    }, dispatch);
+
+    if (!isLoaded(getState())) {
+      return resolver.resolve(this.actions.load);
     }
   }
 
   handleEdit(widget) {
-    const {editStart} = this.props; // eslint-disable-line no-shadow
+    const {editStart} = this.actions; // eslint-disable-line no-shadow
     return () => {
       editStart(String(widget.id));
     };
   }
 
   render() {
-    const {widgets, error, editing, loading, load} = this.props;
+    const {widgets, error, editing, loading} = this.props;
+    const {load} = this.actions;
     let refreshClassName = 'fa fa-refresh';
     if (loading) {
       refreshClassName += ' fa-spin';
