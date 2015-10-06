@@ -34,6 +34,7 @@ class Widgets extends Component {
     loading: PropTypes.bool,
     initializeWithKey: PropTypes.func.isRequired,
     editing: PropTypes.object.isRequired,
+    load: PropTypes.func.isRequired,
     editStart: PropTypes.func.isRequired
   }
 
