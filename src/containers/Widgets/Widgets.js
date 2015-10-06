@@ -2,6 +2,7 @@ import React, {Component, PropTypes} from 'react';
 import {bindActionCreators} from 'redux';
 import DocumentMeta from 'react-document-meta';
 import {connect} from 'react-redux';
+import resolve from 'decorators/redux-resolve';
 import * as widgetActions from 'redux/modules/widgets';
 import {isLoaded} from 'redux/modules/widgets';
 import {initializeWithKey} from 'redux-form';
@@ -21,6 +22,10 @@ import { WidgetForm } from 'components';
     }, dispatch)
   })
 )
+@resolve(
+  'load',
+  (state) => !isLoaded(state)
+)
 export default
 class Widgets extends Component {
   static propTypes = {
@@ -29,20 +34,7 @@ class Widgets extends Component {
     loading: PropTypes.bool,
     initializeWithKey: PropTypes.func.isRequired,
     editing: PropTypes.object.isRequired,
-    load: PropTypes.func.isRequired,
     editStart: PropTypes.func.isRequired
-  }
-
-  static contextTypes = {
-    store: PropTypes.object.isRequired
-  }
-
-  componentWillMount() {
-    const { resolver, getState } = this.context.store;
-
-    if (!isLoaded(getState())) {
-      return resolver.resolve(this.props.load);
-    }
   }
 
   handleEdit(widget) {
