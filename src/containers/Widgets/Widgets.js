@@ -22,10 +22,11 @@ import { WidgetForm } from 'components';
     }, dispatch)
   })
 )
-@resolve(
-  'load',
-  (state) => !isLoaded(state)
-)
+@resolve(function(resolver, getState) {
+  if(!isLoaded(getState())) {
+    resolver.resolve(this.props.load);
+  }
+})
 export default
 class Widgets extends Component {
   static propTypes = {
