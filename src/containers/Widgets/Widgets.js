@@ -13,6 +13,12 @@ import { WidgetForm } from 'components';
     editing: state.widgets.editing,
     error: state.widgets.error,
     loading: state.widgets.loading
+  }),
+  dispatch => ({
+    ...bindActionCreators({
+      ...widgetActions,
+      initializeWithKey
+    }, dispatch)
   })
 )
 export default
@@ -21,8 +27,10 @@ class Widgets extends Component {
     widgets: PropTypes.array,
     error: PropTypes.string,
     loading: PropTypes.bool,
+    initializeWithKey: PropTypes.func.isRequired,
     editing: PropTypes.object.isRequired,
-    dispatch: PropTypes.func.isRequired
+    load: PropTypes.func.isRequired,
+    editStart: PropTypes.func.isRequired
   }
 
   static contextTypes = {
@@ -30,28 +38,22 @@ class Widgets extends Component {
   }
 
   componentWillMount() {
-    const { dispatch } = this.props;
     const { resolver, getState } = this.context.store;
-    this.actions = bindActionCreators( {
-      ...widgetActions,
-      initializeWithKey
-    }, dispatch);
 
     if (!isLoaded(getState())) {
-      return resolver.resolve(this.actions.load);
+      return resolver.resolve(this.props.load);
     }
   }
 
   handleEdit(widget) {
-    const {editStart} = this.actions; // eslint-disable-line no-shadow
+    const {editStart} = this.props; // eslint-disable-line no-shadow
     return () => {
       editStart(String(widget.id));
     };
   }
 
   render() {
-    const {widgets, error, editing, loading} = this.props;
-    const {load} = this.actions;
+    const {widgets, error, editing, load, loading} = this.props;
     let refreshClassName = 'fa fa-refresh';
     if (loading) {
       refreshClassName += ' fa-spin';
