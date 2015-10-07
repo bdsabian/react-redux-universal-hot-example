@@ -10,7 +10,7 @@ export default function resolve(doResolve) {
       componentWillMount() {
         const { resolver, getState } = this.context.store;
 
-        doResolve.apply(this, [resolver, getState]);
+        doResolve(resolver, this.props, getState);
       }
 
       render() {

@@ -22,9 +22,9 @@ import { WidgetForm } from 'components';
     }, dispatch)
   })
 )
-@resolve(function(resolver, getState) {
-  if(!isLoaded(getState())) {
-    resolver.resolve(this.props.load);
+@resolve((resolver, props, getState) => {
+  if (!isLoaded(getState())) {
+    resolver.resolve(props.load);
   }
 })
 export default
